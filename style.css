@@ -100,11 +100,16 @@ header .logo {
     justify-content: space-between;
 }
 
-.small-images img {
+.small-images a {
+    display: inline-block;
     width: calc(33.333% - 6.66px);
+}
+
+.small-images img {
+    width: 100%;
     height: 180px;
     object-fit: cover;
-	transition: transform 0.4s ease-in-out;
+    transition: transform 0.4s ease-in-out;
 }
 
 .small-images img:hover {
@@ -158,4 +163,31 @@ header .logo {
     background-color: #777;
     transform: scale(0.95);
     box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);
+}
+
+body {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+body.light-theme {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+body.dark-theme {
+  background-color: #e0e0e0; /* лёгкий серый */
+  color: #111111;
+}
+
+/* Чтобы ссылки и текст тоже были плавными и читаемыми */
+nav a, .breadcrumb, .price, .product-details p {
+  transition: color 0.4s ease, background-color 0.4s ease;
+}
+
+.dark-theme nav a {
+  color: #444;
+}
+
+.dark-theme .breadcrumb a {
+  color: #555;
 }

@@ -27,6 +27,7 @@ $ git clone https://github.com/breatheco-de/exercise-product-landing-page-plain-
 **Make sure that you have node.js installed in your computer and run the following command on your terminal to preview your website:**
 
 ```sh
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 npx --yes http-server -c-1
 ```
 

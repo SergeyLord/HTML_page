@@ -5,15 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bonsai Product Page</title>
     <link rel="stylesheet" href="style.css">
+	
+	 <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const cssURL = "https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css";
+      const jsURL = "https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js";
+
+      const cssKey = "glightbox-css";
+      const jsKey = "glightbox-js";
+
+      // Хелпер загрузки и кэширования
+      async function loadAndCache(url, key) {
+        let content = localStorage.getItem(key);
+        if (content) {
+          console.log(`✅ Loaded from localStorage: ${key}`);
+          return content;
+        }
+        console.log(`🌐 Fetching from CDN: ${url}`);
+        const res = await fetch(url);
+        const text = await res.text();
+        localStorage.setItem(key, text);
+        return text;
+      }
+
+      // Загрузка CSS
+      const cssContent = await loadAndCache(cssURL, cssKey);
+      const styleTag = document.createElement("style");
+      styleTag.textContent = cssContent;
+      document.head.appendChild(styleTag);
+
+      // Загрузка JS
+      const jsContent = await loadAndCache(jsURL, jsKey);
+      const scriptTag = document.createElement("script");
+      scriptTag.textContent = jsContent;
+      document.body.appendChild(scriptTag);
+
+      // Ждём пока скрипт вставится и выполнится
+      const waitForGlightbox = () =>
+        new Promise((resolve) => {
+          const check = () => {
+            if (typeof GLightbox !== "undefined") {
+              resolve();
+            } else {
+              setTimeout(check, 50);
+            }
+          };
+          check();
+        });
+
+      await waitForGlightbox();
+
+      // Инициализация GLightbox после загрузки
+      GLightbox({ selector: ".glightbox" });
+    });
+  </script>
 </head>
 <body>
+
+<!-- Login Section (Initially Hidden) -->
+<div id="login-bar" style="display: none; justify-content: flex-end; gap: 10px; padding: 10px 20px; background-color: #f4f4f4;">
+	<input type="text" placeholder="Login" name="login" style="padding: 5px;">
+	<input type="password" placeholder="Password" name="password" style="padding: 5px;">
+	<button id="login-btn" style="padding: 5px 10px;">Войти</button>
+</div>
 
 <header>
     <div class="logo">SHOPSHOP</div>
     <nav>
         <a href="#">Products</a>
+        <a id="theme-toggle" href="#">Theme</a>
         <a href="#">About</a>
-        <a href="#">My Account</a>
+       		<a href="#" id="account-link">My Account</a>
         <a href="#">Cart (0)</a>
     </nav>
 </header>
@@ -26,14 +88,21 @@
 
 	<div class="product-images">
 		<div class="large-image">
-			<img src="assets/product2.jpeg" alt="Bonsai 1">
+			<a href="assets/product2.jpeg" class="glightbox">
+				<img src="assets/product2.jpeg" alt="Bonsai 1">
+			</a>
 		</div>
 		<div class="small-images">
-			<img src="assets/product3.jpeg" alt="Bonsai 2">
-			<img src="assets/product2.jpeg" alt="Bonsai 3">
-			<img src="assets/product1.jpeg" alt="Bonsai 4">
+			<a href="assets/product3.jpeg" class="glightbox">
+				<img src="assets/product3.jpeg" alt="Bonsai 2">
+			</a>
+			<a href="assets/product2.jpeg" class="glightbox">
+				<img src="assets/product2.jpeg" alt="Bonsai 3">
+			</a>
+			<a href="assets/product1.jpeg" class="glightbox">
+				<img src="assets/product1.jpeg" alt="Bonsai 4">
+			</a>
 		</div>
-		
 	</div>
 
     <div class="product-details">
@@ -45,5 +114,110 @@
     </div>
 </div>
 
+<script>
+// Тема
+  const body = document.body;
+(function() {
+  if (sessionStorage.getItem("theme") === "dark") {
+	body.classList.remove("light-theme");
+      body.classList.add("dark-theme");
+  } else {
+		body.classList.remove("dark-theme");
+      body.classList.add("light-theme");
+  }
+})();
+
+function setCookie(name, value, days) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+}
+
+function getCookie(name) {
+  return document.cookie.split('; ').reduce((r, v) => {
+    const parts = v.split('=');
+    return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+  }, '');
+}
+
+const accountLink = document.getElementById("account-link");
+const loginBar = document.getElementById("login-bar");
+const loginInput = loginBar.querySelector('input[name="login"]');
+const passwordInput = loginBar.querySelector('input[name="password"]');
+const loginBtn = document.getElementById("login-btn");
+  
+let savedLogin = getCookie('login');
+const savedPassword = getCookie('password');
+  
+if (savedLogin) {
+   accountLink.textContent = `| ${savedLogin} |`;
+   loginBar.style.display = "none";
+}
+
+accountLink.addEventListener("click", function (e) {
+  
+if (savedLogin) {
+	setCookie('login', null, 0);
+	setCookie('password', null, 0);
+	accountLink.textContent = `My Account`;
+	savedLogin = '';
+	return;
+}
+  
+e.preventDefault();
+
+if (loginBar.style.display === "flex") {
+    loginBar.style.display = "none";
+} else {
+    loginBar.style.display = "flex";
+    setTimeout(() => loginInput.focus(), 50);
+}
+});
+
+  loginBtn.addEventListener("click", function () {
+    const loginValue = loginInput.value.trim();
+    const passwordValue = passwordInput.value.trim();
+
+    if (loginValue === "") {
+      alert("Пожалуйста, введите логин");
+      loginInput.focus();
+      return;
+    }
+	
+	if (passwordValue === "") {
+      alert("Пожалуйста, введите пароль");
+      passwordInput.focus();
+      return;
+    }
+	
+	setCookie('login', loginValue, 1);
+    setCookie('password', passwordValue, 1);
+	
+    loginBar.style.display = "none";
+    accountLink.textContent = `| ${loginValue} |`;
+
+    loginInput.value = "";
+    passwordInput.value = "";
+	
+	savedLogin = getCookie('login');
+  });
+
+  // Переключение темы
+  const themeToggle = document.getElementById("theme-toggle");
+	themeToggle.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    if (sessionStorage.getItem("theme") === "light") {
+      body.classList.remove("light-theme");
+      body.classList.add("dark-theme");
+      sessionStorage.setItem("theme", "dark");
+    } else {
+      body.classList.remove("dark-theme");
+      body.classList.add("light-theme");
+      sessionStorage.setItem("theme", "light");
+    }
+  });
+  
+  
+</script>
 </body>
 </html>
